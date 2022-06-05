@@ -1,23 +1,27 @@
-CREATE DATABASE IF NOT EXISTS business_db
+DROP DATABASE IF EXISTS business_db;
+CREATE DATABASE business_db;
 
-CREATE TABLE IF NOT EXISTS departments (
-    dept_id INT PRIMARY KEY AUTO_INCREMENT,
-    dept_name VARCHAR(25),
-)
+USE business_db;
 
-CREATE TABLE IF NOT EXISTS roles (
-    role_id INT PRIMARY KEY AUTO_INCREMENT,
-    role_title VARCHAR(25),
-    role_dept VARCHAR(25),
+CREATE TABLE departments (
+    dept_id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    dept_name VARCHAR(30)
+);
+
+CREATE TABLE roles (
+    role_id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    role_title VARCHAR(30),
+    role_dept INT,
     role_pay DECIMAL,
-)
+    FOREIGN KEY (role_dept) REFERENCES departments(dept_id)
+);
 
-CREATE TABLE IF NOT EXISTS employees (
-    employee_id INT PRIMARY KEY AUTO_INCREMENT,
-    employee_fname VARCHAR(25),
-    employee_lname VARCHAR(25),
-    employee_role VARCHAR(25),
-    employee_dept VARCHAR(25),
-    employee_pay VARCHAR(25),
-    employee_mngr VARCHAR(25),
-)
+CREATE TABLE employees (
+    id int NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    employee_fname VARCHAR(30),
+    employee_lname VARCHAR(30),
+    employee_role INT,
+    FOREIGN KEY (employee_role)
+    REFERENCES roles(role_id),
+    employee_mngr INT
+);
