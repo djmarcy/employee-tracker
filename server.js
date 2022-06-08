@@ -1,6 +1,7 @@
 require(`dotenv`).config();
 let mysql = require("mysql");
 let inquirer = require("inquirer");
+require("console.table");
 
 const connection = mysql.createConnection({
   database: process.env.DB_NAME,
@@ -40,7 +41,7 @@ const addDept = [
   },
 ];
 
-const addtlRole = [
+const addntlRole = [
   {
     type: `input`,
     name: `roleName`,
@@ -53,8 +54,44 @@ const addtlRole = [
   },
   {
     type: `input`,
-    name: `roleName`,
-    message: `What is the name of the role you would like to add?`,
+    name: `rolePay`,
+    message: `What is the salary for this position?`,
+  },
+];
+
+const addntlEmployee = [
+  {
+    type: `input`,
+    name: `employeeFname`,
+    message: `Employee first name:`,
+  },
+  {
+    type: `input`,
+    name: `employeeLname`,
+    message: `Employee last name:`,
+  },
+  {
+    type: `input`,
+    name: `employeeRole`,
+    message: `Enter employee role ID:`,
+  },
+  {
+    type: `input`,
+    name: `employeeMngr`,
+    message: `Enter employee manager ID:`,
+  },
+];
+
+const updateEmployeeRole = [
+  {
+    type: `input`,
+    name: `employeeId`,
+    message: `Employee ID:`,
+  },
+  {
+    type: `input`,
+    name: `employeeRole`,
+    message: `Employee new role:`,
   },
 ];
 
@@ -95,17 +132,18 @@ function init() {
 
 // View Functions
 function viewDepartments() {
-  let sql = `SELECT * FROM departments`;
+  let sql = `SELECT * FROM departments;`;
 
-  connection.query(sql, (err, result) => {
+  connection.query(sql, (err, response) => {
     if (err) throw err;
-    console.table(result);
-    init();
+    console.log(response);
   });
+
+  init();
 }
 
 function viewRoles() {
-  let sql = `SELECT * FROM roles`;
+  let sql = `SELECT * FROM roles;`;
 
   connection.query(sql, (err, result) => {
     if (err) throw err;
@@ -116,7 +154,7 @@ function viewRoles() {
 }
 
 function viewEmployees() {
-  let sql = `SELECT * FROM employees`;
+  let sql = `SELECT * FROM employees;`;
 
   connection.query(sql, (err, result) => {
     if (err) throw err;
@@ -128,9 +166,26 @@ function viewEmployees() {
 
 // Create Functions
 function addDepartment() {
-  inquirer.prompt(addDept).then((response) => {
-    let deptName = response.deptName;
-    let sql = `INSERT INTO departments VALUES (${deptName})`;
+  inquirer
+    .prompt(addDept)
+    .then((response) => {
+      let deptName = response.deptName;
+      let sql = `INSERT INTO departments (dept_name) VALUES (${deptName});`;
+
+      connection.query(sql, (err, result) => {
+        if (err) throw err;
+        console.table(result);
+      });
+    })
+    .then(init());
+}
+
+function addRole() {
+  inquirer.prompt(addntlRole).then((response) => {
+    let roleTitle = response.roleTitle;
+    let roleDept = response.roleDept;
+    let rolePay = response.rolePay;
+    let sql = `INSERT INTO roles (role_title, role_dept, role_pay) VALUES (${roleTitle}, ${roleDept}, ${rolePay});`;
 
     connection.query(sql, (err, result) => {
       if (err) throw err;
@@ -141,44 +196,37 @@ function addDepartment() {
   init();
 }
 
-function addRole() {
-  let roleTitle = "";
-  let roleDept = "";
-  let rolePay = "";
-  let sql = `INSERT INTO roles VALUES (${roleTitle}, ${roleDept}, ${rolePay})`;
-
-  connection.query(sql, (err, result) => {
-    if (err) throw err;
-    console.table(result);
-  });
-
-  init();
-}
-
 function addEmployee() {
-  let roleTitle = "";
-  let roleDept = "";
-  let rolePay = "";
-  let sql = `INSERT INTO roles VALUES (${roleTitle}, ${roleDept}, ${rolePay})`;
+  inquirer
+    .prompt(addntlEmployee)
+    .then((response) => {
+      let employeeFname = response.employeeFname;
+      let employeeLname = response.employeeLname;
+      let employeeRole = response.employeeRole;
+      let employeeMngr = response.employeeMngr;
+      let sql = `INSERT INTO employees (employee_fname, employee_lname, employee_role, employee_mngr) VALUES (${employeeFname}, ${employeeLname}, ${employeeRole}, ${employeeMngr});`;
 
-  connection.query(sql, (err, result) => {
-    if (err) throw err;
-    console.table(result);
-  });
-
-  init();
+      connection.query(sql, (err, result) => {
+        if (err) throw err;
+        console.table(result);
+      });
+    })
+    .then(init());
 }
 
 function updateEmployee() {
-  let attr = "";
-  let employeeFname = "";
-  let sql = `SELECT * FROM employees
-             UPDATE employees SET ${attr} WHERE employee_fname = ${employeeFname}`;
+  inquirer
+    .prompt(updateEmployeeRole)
+    .then((response) => {
+      let employeeId = response.employeeId;
+      let employeeRole = response.employeeRole;
+      let sql = `SELECT * FROM employees
+              UPDATE employees SET employee.role = ${employeeRole} WHERE id = ${employeeId};`;
 
-  connection.query(sql, (err, result) => {
-    if (err) throw err;
-    console.table(result);
-  });
-
-  init();
+      connection.query(sql, (err, result) => {
+        if (err) throw err;
+        console.table(result);
+      });
+    })
+    .then(init());
 }
